@@ -1,13 +1,6 @@
 import { redirect } from 'next/navigation'
-import { createClient } from '@/utils/supabase/server'
 
-export default async function Home() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user) {
-    redirect('/dashboard')
-  } else {
-    redirect('/login')
-  }
+export default function Home() {
+  // Middleware handles the redirect based on auth state and role
+  redirect('/login')
 }

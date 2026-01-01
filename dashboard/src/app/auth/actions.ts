@@ -12,14 +12,29 @@ export async function login(formData: FormData) {
         password: formData.get('password') as string,
     }
 
-    const { error } = await supabase.auth.signInWithPassword(data)
+    const { data: authData, error } = await supabase.auth.signInWithPassword(data)
 
     if (error) {
         return { error: error.message }
     }
 
+    // Fetch user role
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', authData.user.id)
+        .single()
+
     revalidatePath('/', 'layout')
-    redirect('/dashboard')
+
+    // Redirect based on role
+    if (profile?.role === 'owner') {
+        redirect('/owner')
+    } else if (profile?.role === 'manager') {
+        redirect('/manager')
+    } else {
+        return { error: 'Invalid user role' }
+    }
 }
 
 export async function signup(formData: FormData) {
@@ -43,7 +58,8 @@ export async function signup(formData: FormData) {
     }
 
     revalidatePath('/', 'layout')
-    redirect('/dashboard')
+    // New users need profile created - redirect to login
+    redirect('/login')
 }
 
 export async function logout() {
