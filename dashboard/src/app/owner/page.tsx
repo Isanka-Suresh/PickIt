@@ -1,28 +1,37 @@
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 
 export default async function OwnerDashboardPage() {
+    // Use regular client for auth
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
+    // Use admin client for data fetching (bypasses RLS)
+    const adminClient = createAdminClient()
+
     // Fetch profile with full name
-    const { data: profile } = await supabase
+    const { data: profile } = await adminClient
         .from('profiles')
         .select('full_name')
         .eq('id', user?.id)
         .single()
 
-    // Fetch supermarkets count
-    const { count: supermarketsCount } = await supabase
+    // Fetch supermarkets count (using admin client to bypass RLS)
+    const { count: supermarketsCount, error: supermarketsError } = await adminClient
         .from('supermarkets')
         .select('*', { count: 'exact', head: true })
 
+    if (supermarketsError) {
+        console.error('Error fetching supermarkets:', supermarketsError)
+    }
+
     // Fetch branches count
-    const { count: branchesCount } = await supabase
+    const { count: branchesCount } = await adminClient
         .from('branches')
         .select('*', { count: 'exact', head: true })
 
     // Fetch orders count
-    const { count: ordersCount } = await supabase
+    const { count: ordersCount } = await adminClient
         .from('orders')
         .select('*', { count: 'exact', head: true })
 

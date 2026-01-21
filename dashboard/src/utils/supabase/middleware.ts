@@ -6,6 +6,7 @@ export async function updateSession(request: NextRequest) {
         request,
     })
 
+    // Use anon key - standard Supabase pattern
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -47,13 +48,21 @@ export async function updateSession(request: NextRequest) {
     // If user is authenticated
     if (user) {
         // Fetch user role from profiles table
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
             .from('profiles')
             .select('role')
             .eq('id', user.id)
             .single()
 
         const role = profile?.role
+
+        // If profile doesn't exist or fetch failed, sign out the user
+        if (profileError || !profile) {
+            await supabase.auth.signOut()
+            const url = request.nextUrl.clone()
+            url.pathname = '/login'
+            return NextResponse.redirect(url)
+        }
 
         // Redirect from auth pages to appropriate dashboard
         if (isPublicRoute || pathname === '/') {
@@ -62,8 +71,16 @@ export async function updateSession(request: NextRequest) {
                 url.pathname = '/owner'
             } else if (role === 'manager') {
                 url.pathname = '/manager'
+            } else if (role === 'customer') {
+                // Customer role - sign out and show error
+                // Customers don't have a dashboard in this system
+                await supabase.auth.signOut()
+                url.pathname = '/login'
+                // Note: We can't pass error message through redirect
+                // Consider using URL params or creating a customer portal
             } else {
-                // Customer or unknown role - redirect to login for now
+                // Unknown role - sign out for security
+                await supabase.auth.signOut()
                 url.pathname = '/login'
             }
             return NextResponse.redirect(url)

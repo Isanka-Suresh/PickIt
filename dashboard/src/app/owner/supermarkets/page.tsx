@@ -1,8 +1,9 @@
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import SupermarketsClient from './SupermarketsClient'
 
 export default async function SupermarketsPage() {
-    const supabase = await createClient()
+    // Use admin client to bypass RLS for owner operations
+    const supabase = createAdminClient()
 
     const { data: supermarkets, error } = await supabase
         .from('supermarkets')

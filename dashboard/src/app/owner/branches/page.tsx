@@ -1,4 +1,4 @@
-import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 import BranchesClient from './BranchesClient'
 
 interface Branch {
@@ -23,7 +23,8 @@ interface Manager {
 }
 
 export default async function BranchesPage() {
-    const supabase = await createClient()
+    // Use admin client to bypass RLS for owner operations
+    const supabase = createAdminClient()
 
     // Fetch branches with supermarket and manager info
     const { data: branches, error: branchesError } = await supabase
