@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 
 export async function createBranch(formData: FormData) {
+    // Use regular client for authentication
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -23,7 +25,10 @@ export async function createBranch(formData: FormData) {
         return { error: 'Please select a supermarket' }
     }
 
-    const { error } = await supabase
+    // Use admin client for database operations to bypass RLS
+    const adminClient = createAdminClient()
+
+    const { error } = await adminClient
         .from('branches')
         .insert({
             name: name.trim(),
@@ -40,6 +45,7 @@ export async function createBranch(formData: FormData) {
 }
 
 export async function updateBranch(id: string, formData: FormData) {
+    // Use regular client for authentication
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -56,7 +62,10 @@ export async function updateBranch(id: string, formData: FormData) {
         return { error: 'Branch name is required' }
     }
 
-    const { error } = await supabase
+    // Use admin client for database operations to bypass RLS
+    const adminClient = createAdminClient()
+
+    const { error } = await adminClient
         .from('branches')
         .update({
             name: name.trim(),
@@ -75,6 +84,7 @@ export async function updateBranch(id: string, formData: FormData) {
 }
 
 export async function deleteBranch(id: string) {
+    // Use regular client for authentication
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -82,7 +92,10 @@ export async function deleteBranch(id: string) {
         return { error: 'Not authenticated' }
     }
 
-    const { error } = await supabase
+    // Use admin client for database operations to bypass RLS
+    const adminClient = createAdminClient()
+
+    const { error } = await adminClient
         .from('branches')
         .delete()
         .eq('id', id)

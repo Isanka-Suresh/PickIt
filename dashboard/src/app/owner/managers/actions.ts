@@ -5,19 +5,31 @@ import { createClient } from '@/utils/supabase/server'
 import { createAdminClient } from '@/utils/supabase/admin'
 
 export async function createManager(formData: FormData) {
+    console.log('=== CREATE MANAGER ACTION START ===')
+
+    // Use regular client for authentication
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+
+    console.log('User authenticated:', user?.id, user?.email)
 
     if (!user) {
         return { error: 'Not authenticated' }
     }
 
+    // Use admin client for all database operations
+    const adminClient = createAdminClient()
+
+    console.log('Admin client created')
+
     // Verify the current user is an owner
-    const { data: currentProfile } = await supabase
+    const { data: currentProfile } = await adminClient
         .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single()
+
+    console.log('Current user profile:', currentProfile)
 
     if (currentProfile?.role !== 'owner') {
         return { error: 'Only owners can create managers' }
@@ -28,6 +40,8 @@ export async function createManager(formData: FormData) {
     const full_name = formData.get('full_name') as string
     const branch_id = formData.get('branch_id') as string
 
+    console.log('Form data:', { email, full_name, branch_id, passwordLength: password?.length })
+
     if (!email || !password) {
         return { error: 'Email and password are required' }
     }
@@ -36,30 +50,40 @@ export async function createManager(formData: FormData) {
         return { error: 'Password must be at least 6 characters' }
     }
 
-    // Use admin client to create auth user
-    const adminClient = createAdminClient()
+    // Already using admin client from above
 
     // Create auth user
+    console.log('Creating auth user...')
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
         email,
         password,
         email_confirm: true
     })
 
+    console.log('Auth user created:', { userId: authData?.user?.id, error: authError })
+
     if (authError) {
+        console.error('Auth error:', authError)
         return { error: authError.message }
     }
 
-    // Create profile for the new manager
+    // Create or update profile for the new manager
+    // Note: Supabase may auto-create a profile via trigger, so we use upsert
+    console.log('Creating/updating profile...')
     const { error: profileError } = await adminClient
         .from('profiles')
-        .insert({
+        .upsert({
             id: authData.user.id,
             role: 'manager',
             full_name: full_name?.trim() || null
+        }, {
+            onConflict: 'id'
         })
 
+    console.log('Profile created, error:', profileError)
+
     if (profileError) {
+        console.error('Profile error:', profileError)
         // Rollback: delete the auth user if profile creation fails
         await adminClient.auth.admin.deleteUser(authData.user.id)
         return { error: profileError.message }
@@ -67,10 +91,13 @@ export async function createManager(formData: FormData) {
 
     // If branch_id provided, assign manager to branch
     if (branch_id) {
-        const { error: branchError } = await supabase
+        console.log('Assigning manager to branch:', branch_id)
+        const { error: branchError } = await adminClient
             .from('branches')
             .update({ manager_id: authData.user.id })
             .eq('id', branch_id)
+
+        console.log('Branch assignment result, error:', branchError)
 
         if (branchError) {
             console.error('Error assigning manager to branch:', branchError)
@@ -80,6 +107,7 @@ export async function createManager(formData: FormData) {
 
     revalidatePath('/owner/managers')
     revalidatePath('/owner/branches')
+    console.log('=== CREATE MANAGER ACTION SUCCESS ===')
     return { success: true }
 }
 
@@ -94,7 +122,7 @@ export async function updateManager(id: string, formData: FormData) {
     const full_name = formData.get('full_name') as string
     const branch_id = formData.get('branch_id') as string
 
-    // Use admin client to update profile
+    // Use admin client for all database operations
     const adminClient = createAdminClient()
 
     const { error: profileError } = await adminClient
@@ -110,14 +138,14 @@ export async function updateManager(id: string, formData: FormData) {
 
     // Update branch assignment
     // First, remove manager from any currently assigned branches
-    await supabase
+    await adminClient
         .from('branches')
         .update({ manager_id: null })
         .eq('manager_id', id)
 
     // Then assign to new branch if provided
     if (branch_id) {
-        const { error: branchError } = await supabase
+        const { error: branchError } = await adminClient
             .from('branches')
             .update({ manager_id: id })
             .eq('id', branch_id)
@@ -133,6 +161,7 @@ export async function updateManager(id: string, formData: FormData) {
 }
 
 export async function deleteManager(id: string) {
+    // Use regular client for authentication
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -140,8 +169,11 @@ export async function deleteManager(id: string) {
         return { error: 'Not authenticated' }
     }
 
+    // Use admin client for all database operations
+    const adminClient = createAdminClient()
+
     // Verify the current user is an owner
-    const { data: currentProfile } = await supabase
+    const { data: currentProfile } = await adminClient
         .from('profiles')
         .select('role')
         .eq('id', user.id)
@@ -150,9 +182,6 @@ export async function deleteManager(id: string) {
     if (currentProfile?.role !== 'owner') {
         return { error: 'Only owners can delete managers' }
     }
-
-    // Use admin client to delete user
-    const adminClient = createAdminClient()
 
     // Remove manager from branches first
     await adminClient
