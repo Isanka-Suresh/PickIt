@@ -2,13 +2,11 @@ import { AppState } from 'react-native'
 import 'react-native-url-polyfill/auto'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { createClient } from '@supabase/supabase-js'
-import { Database } from '../../shared/types/database.types'
+import { Database, getSupabaseConfig } from '@pickit/shared'
 
-// Default to empty string to prevent crashing if env vars are missing during build time
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || ''
+const { url, key } = getSupabaseConfig()
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(url, key, {
     auth: {
         storage: AsyncStorage,
         autoRefreshToken: true,
@@ -17,6 +15,7 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
     },
 })
 
+// Listen to app state changes to handle auth refresh
 AppState.addEventListener('change', (state) => {
     if (state === 'active') {
         supabase.auth.startAutoRefresh()
