@@ -12,8 +12,8 @@
 			"@api/*": [
 				"./src/api/*"
 			],
-			"@shared/*": [
-				"../../shared/*"
+			"@pickit/shared/*": [
+				"../../packages/shared/src/*"
 			],
 			"@screens/*": [
 				"./src/screens/*"
@@ -44,6 +44,6 @@
 	},
 	"include": [
 		"src",
-		"../../shared/types"
+		"../../packages/shared/src"
 	]
 }
