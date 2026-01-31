@@ -2,19 +2,10 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '../../lib/supabase';
-// We don't have exact types yet, defining locally for now
-export type Supermarket = {
-    id: string; // or number, keeping string for safety until verified
-    name: string;
-    logo_url?: string;
-};
+import { Tables } from '@pickit/shared';
 
-export type Branch = {
-    id: string; // or number
-    supermarket_id: string;
-    name: string;
-    address?: string;
-};
+export type Supermarket = Tables<'supermarkets'>;
+export type Branch = Tables<'branches'>;
 
 type StoreContextType = {
     selectedSupermarket: Supermarket | null;

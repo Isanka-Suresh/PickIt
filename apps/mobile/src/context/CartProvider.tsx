@@ -1,17 +1,9 @@
 
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Tables } from '@pickit/shared';
 
-export type Product = {
-    id: string;
-    branch_id: string;
-    name: string;
-    description?: string;
-    price: number;
-    stock_quantity: number;
-    image_url?: string;
-    category: string;
-};
+export type Product = Tables<'products'>;
 
 export type CartItem = {
     product: Product;
