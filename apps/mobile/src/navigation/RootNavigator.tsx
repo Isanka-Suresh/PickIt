@@ -36,11 +36,16 @@ function StoreSelectionStack() {
     );
 }
 
+import CheckoutScreen from '../screens/cart/CheckoutScreen';
+import OrderSuccessScreen from '../screens/cart/OrderSuccessScreen';
+
 function AppStack() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="ProductList" component={ProductListScreen} />
             <Stack.Screen name="Cart" component={CartScreen} />
+            <Stack.Screen name="Checkout" component={CheckoutScreen} />
+            <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
         </Stack.Navigator>
     );
 }

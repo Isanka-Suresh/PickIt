@@ -5,7 +5,7 @@ import { useCart, CartItem } from '../../context/CartProvider';
 import { useNavigation } from '@react-navigation/native';
 
 export default function CartScreen() {
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
     const { items, updateQuantity, totalPrice, clearCart } = useCart();
 
     const renderItem = ({ item }: { item: CartItem }) => (
@@ -60,8 +60,11 @@ export default function CartScreen() {
                         <Text style={styles.totalLabel}>Total:</Text>
                         <Text style={styles.totalValue}>${totalPrice.toFixed(2)}</Text>
                     </View>
-                    <TouchableOpacity style={styles.checkoutBtn} onPress={clearCart}>
-                        <Text style={styles.checkoutText}>Checkout (Demo)</Text>
+                    <TouchableOpacity
+                        style={styles.checkoutBtn}
+                        onPress={() => navigation.navigate('Checkout')}
+                    >
+                        <Text style={styles.checkoutText}>Proceed to Checkout</Text>
                     </TouchableOpacity>
                 </View>
             )}
