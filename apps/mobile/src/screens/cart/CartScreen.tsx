@@ -4,6 +4,8 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react
 import { useCart, CartItem } from '../../context/CartProvider';
 import { useNavigation } from '@react-navigation/native';
 
+import RecommendationList from '../../components/RecommendationList';
+
 export default function CartScreen() {
     const navigation = useNavigation<any>();
     const { items, updateQuantity, totalPrice, clearCart } = useCart();
@@ -51,6 +53,7 @@ export default function CartScreen() {
                     renderItem={renderItem}
                     keyExtractor={(i) => i.product.id}
                     contentContainerStyle={styles.list}
+                    ListFooterComponent={<RecommendationList />}
                 />
             )}
 
