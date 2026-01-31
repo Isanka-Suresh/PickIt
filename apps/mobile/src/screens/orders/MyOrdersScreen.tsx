@@ -78,16 +78,31 @@ export default function MyOrdersScreen() {
         </TouchableOpacity>
     );
 
+    import Skeleton from '../../components/Skeleton';
+    import EmptyState from '../../components/EmptyState';
+
+    // ... inside component
+
     if (loading && !refreshing) {
-        return <View style={styles.center}><ActivityIndicator size="large" /></View>;
+        return (
+            <View style={styles.container}>
+                <Text style={styles.title}>My Orders</Text>
+                {[1, 2, 3, 4].map(key => (
+                    <View key={key} style={styles.card}>
+                        <View style={styles.headerRow}>
+                            <Skeleton width={80} height={16} />
+                            <Skeleton width={60} height={20} style={{ borderRadius: 10 }} />
+                        </View>
+                        <Skeleton width="40%" height={24} style={{ marginBottom: 5 }} />
+                        <Skeleton width="60%" height={16} />
+                    </View>
+                ))}
+            </View>
+        );
     }
 
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={() => navigation.navigate('ProductList')} style={styles.backButton}>
-                <Text style={styles.backText}>← Back to Shopping</Text>
-            </TouchableOpacity>
-
             <Text style={styles.title}>My Orders</Text>
 
             <FlatList
@@ -99,9 +114,13 @@ export default function MyOrdersScreen() {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
                 ListEmptyComponent={
-                    <View style={styles.empty}>
-                        <Text>No orders found.</Text>
-                    </View>
+                    <EmptyState
+                        title="No orders yet"
+                        description="Your past and current orders will appear here."
+                        icon="📦"
+                        actionLabel="Start Shopping"
+                        onAction={() => navigation.navigate('Shop', { screen: 'ProductList' })}
+                    />
                 }
             />
         </View>

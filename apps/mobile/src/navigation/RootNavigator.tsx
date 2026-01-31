@@ -36,21 +36,53 @@ function StoreSelectionStack() {
     );
 }
 
-import CheckoutScreen from '../screens/cart/CheckoutScreen';
-import OrderSuccessScreen from '../screens/cart/OrderSuccessScreen';
-import MyOrdersScreen from '../screens/orders/MyOrdersScreen';
-import OrderDetailsScreen from '../screens/orders/OrderDetailsScreen';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import ProfileScreen from '../screens/profile/ProfileScreen';
 
-function AppStack() {
+const Tab = createBottomTabNavigator();
+
+function ShopStack() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="ProductList" component={ProductListScreen} />
             <Stack.Screen name="Cart" component={CartScreen} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
-            <Stack.Screen name="MyOrders" component={MyOrdersScreen} />
             <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
         </Stack.Navigator>
+    );
+}
+
+function OrdersStack() {
+    return (
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="MyOrdersList" component={MyOrdersScreen} />
+            <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+        </Stack.Navigator>
+    )
+}
+
+function AppStack() {
+    return (
+        <Tab.Navigator
+            screenOptions={({ route }) => ({
+                headerShown: false,
+                tabBarIcon: ({ focused, color, size }) => {
+                    let iconName;
+                    if (route.name === 'Shop') iconName = '🛍️';
+                    else if (route.name === 'Orders') iconName = '📦';
+                    else if (route.name === 'Profile') iconName = '👤';
+
+                    return <Text style={{ fontSize: size }}>{iconName}</Text>;
+                },
+                tabBarActiveTintColor: '#007AFF',
+                tabBarInactiveTintColor: 'gray',
+            })}
+        >
+            <Tab.Screen name="Shop" component={ShopStack} />
+            <Tab.Screen name="Orders" component={OrdersStack} />
+            <Tab.Screen name="Profile" component={ProfileScreen} />
+        </Tab.Navigator>
     );
 }
 

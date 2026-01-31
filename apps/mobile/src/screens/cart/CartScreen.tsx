@@ -36,17 +36,22 @@ export default function CartScreen() {
     );
 
     return (
-        <View style={styles.container}>
-            <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                <Text style={styles.backText}>← Back to Shopping</Text>
-            </TouchableOpacity>
+import EmptyState from '../../components/EmptyState';
 
+    // ... inside component
+
+    return (
+        <View style={styles.container}>
             <Text style={styles.title}>Your Cart</Text>
 
             {items.length === 0 ? (
-                <View style={styles.empty}>
-                    <Text>Your cart is empty.</Text>
-                </View>
+                <EmptyState
+                    title="Your cart is empty"
+                    description="Looks like you haven't added anything yet."
+                    icon="🛒"
+                    actionLabel="Start Shopping"
+                    onAction={() => navigation.navigate('Shop', { screen: 'ProductList' })}
+                />
             ) : (
                 <FlatList
                     data={items}

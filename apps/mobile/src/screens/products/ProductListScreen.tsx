@@ -72,22 +72,39 @@ export default function ProductListScreen() {
         );
     };
 
+    import Skeleton from '../../components/Skeleton';
+
+    // ... inside component
+
     if (loading) {
-        return <View style={styles.center}><ActivityIndicator size="large" /></View>;
+        return (
+            <View style={styles.container}>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Products</Text>
+                </View>
+                <View style={{ marginBottom: 20 }}>
+                    <Skeleton width={100} height={40} style={{ borderRadius: 20 }} />
+                </View>
+                {[1, 2, 3].map(key => (
+                    <View key={key} style={styles.card}>
+                        <Skeleton width={80} height={80} style={{ marginRight: 15 }} />
+                        <View style={{ flex: 1 }}>
+                            <Skeleton width="80%" height={20} style={{ marginBottom: 10 }} />
+                            <Skeleton width="40%" height={16} />
+                        </View>
+                    </View>
+                ))}
+            </View>
+        );
     }
 
     return (
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Products</Text>
-                <View style={styles.headerButtons}>
-                    <TouchableOpacity onPress={() => navigation.navigate('MyOrders')} style={[styles.iconButton, { marginRight: 10 }]}>
-                        <Text style={styles.iconButtonText}>📦 Orders</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.cartButton}>
-                        <Text style={styles.cartButtonText}>🛒 Cart ({items.length})</Text>
-                    </TouchableOpacity>
-                </View>
+                <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.cartButton}>
+                    <Text style={styles.cartButtonText}>🛒 Cart ({items.length})</Text>
+                </TouchableOpacity>
             </View>
 
             <View style={styles.categories}>
