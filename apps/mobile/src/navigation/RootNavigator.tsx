@@ -38,6 +38,8 @@ function StoreSelectionStack() {
 
 import CheckoutScreen from '../screens/cart/CheckoutScreen';
 import OrderSuccessScreen from '../screens/cart/OrderSuccessScreen';
+import MyOrdersScreen from '../screens/orders/MyOrdersScreen';
+import OrderDetailsScreen from '../screens/orders/OrderDetailsScreen';
 
 function AppStack() {
     return (
@@ -46,6 +48,8 @@ function AppStack() {
             <Stack.Screen name="Cart" component={CartScreen} />
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
+            <Stack.Screen name="MyOrders" component={MyOrdersScreen} />
+            <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
         </Stack.Navigator>
     );
 }

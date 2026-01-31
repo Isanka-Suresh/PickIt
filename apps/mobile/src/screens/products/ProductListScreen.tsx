@@ -80,9 +80,14 @@ export default function ProductListScreen() {
         <View style={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.title}>Products</Text>
-                <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.cartButton}>
-                    <Text style={styles.cartButtonText}>🛒 Cart ({items.length})</Text>
-                </TouchableOpacity>
+                <View style={styles.headerButtons}>
+                    <TouchableOpacity onPress={() => navigation.navigate('MyOrders')} style={[styles.iconButton, { marginRight: 10 }]}>
+                        <Text style={styles.iconButtonText}>📦 Orders</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity onPress={() => navigation.navigate('Cart')} style={styles.cartButton}>
+                        <Text style={styles.cartButtonText}>🛒 Cart ({items.length})</Text>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             <View style={styles.categories}>
@@ -129,6 +134,20 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 15,
         paddingHorizontal: 10
+    },
+    headerButtons: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    iconButton: {
+        backgroundColor: '#f0f0f0',
+        padding: 8,
+        borderRadius: 20
+    },
+    iconButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333'
     },
     title: {
         fontSize: 28,
