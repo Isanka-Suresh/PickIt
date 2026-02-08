@@ -1,8 +1,8 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
-import { useAuth } from '../context/AuthProvider';
-import { useStore } from '../context/StoreProvider';
+import { useAuth } from '../../context/AuthProvider';
+import { useStore } from '../../context/StoreProvider';
 import { supabase } from '../../lib/supabase';
 
 export default function ProfileScreen() {

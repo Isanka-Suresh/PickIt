@@ -48,12 +48,19 @@ export default function SupermarketSelectionScreen() {
 
     return (
         <View style={styles.container}>
-            <Text style={styles.title}>Select Supermarket</Text>
             <FlatList
                 data={supermarkets}
                 renderItem={renderItem}
                 keyExtractor={(item) => item.id.toString()}
                 contentContainerStyle={styles.list}
+                ListEmptyComponent={
+                    <View style={styles.emptyContainer}>
+                        <Text style={styles.emptyText}>No supermarkets found</Text>
+                        <TouchableOpacity style={styles.retryBtn} onPress={fetchSupermarkets}>
+                            <Text style={styles.retryText}>Retry</Text>
+                        </TouchableOpacity>
+                    </View>
+                }
             />
         </View>
     );
@@ -79,6 +86,7 @@ const styles = StyleSheet.create({
     },
     list: {
         paddingBottom: 20,
+        flexGrow: 1,
     },
     card: {
         backgroundColor: '#fff',
@@ -102,5 +110,26 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: '600',
         color: '#333',
+    },
+    emptyContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingTop: 50,
+    },
+    emptyText: {
+        fontSize: 16,
+        color: '#666',
+        marginBottom: 20,
+    },
+    retryBtn: {
+        backgroundColor: '#007AFF',
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 20,
+    },
+    retryText: {
+        color: '#fff',
+        fontWeight: 'bold',
     },
 });

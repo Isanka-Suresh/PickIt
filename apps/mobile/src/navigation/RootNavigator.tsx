@@ -14,7 +14,7 @@ import BranchSelectionScreen from '../screens/store/BranchSelectionScreen';
 import { useAuth } from '../context/AuthProvider';
 import { useStore } from '../context/StoreProvider';
 import { useCart } from '../context/CartProvider';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, View, Text } from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,9 +29,17 @@ function AuthStack() {
 
 function StoreSelectionStack() {
     return (
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="SupermarketSelection" component={SupermarketSelectionScreen} />
-            <Stack.Screen name="BranchSelection" component={BranchSelectionScreen} />
+        <Stack.Navigator screenOptions={{ headerShown: true, title: 'Select Store' }}>
+            <Stack.Screen
+                name="SupermarketSelection"
+                component={SupermarketSelectionScreen}
+                options={{ title: 'Select Supermarket' }}
+            />
+            <Stack.Screen
+                name="BranchSelection"
+                component={BranchSelectionScreen}
+                options={{ title: 'Select Branch' }}
+            />
         </Stack.Navigator>
     );
 }
@@ -46,9 +54,11 @@ function ShopStack() {
         <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen name="ProductList" component={ProductListScreen} />
             <Stack.Screen name="Cart" component={CartScreen} />
+            {/* TODO: Add these screens when implemented
             <Stack.Screen name="Checkout" component={CheckoutScreen} />
             <Stack.Screen name="OrderSuccess" component={OrderSuccessScreen} />
             <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+            */}
         </Stack.Navigator>
     );
 }
@@ -56,10 +66,13 @@ function ShopStack() {
 function OrdersStack() {
     return (
         <Stack.Navigator screenOptions={{ headerShown: false }}>
+            {/* TODO: Add these screens when implemented
             <Stack.Screen name="MyOrdersList" component={MyOrdersScreen} />
             <Stack.Screen name="OrderDetails" component={OrderDetailsScreen} />
+            */}
+            <Stack.Screen name="OrdersPlaceholder" component={ProfileScreen} />
         </Stack.Navigator>
-    )
+    );
 }
 
 function AppStack() {

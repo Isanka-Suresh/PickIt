@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { useStore } from '../../context/StoreProvider';
 import { useCart, Product } from '../../context/CartProvider';
 import { useNavigation } from '@react-navigation/native';
+import Skeleton from '../../components/Skeleton';
 
 export default function ProductListScreen() {
     const navigation = useNavigation<any>();
@@ -72,7 +73,6 @@ export default function ProductListScreen() {
         );
     };
 
-    import Skeleton from '../../components/Skeleton';
 
     // ... inside component
 

@@ -3,6 +3,7 @@ import React from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useCart, CartItem } from '../../context/CartProvider';
 import { useNavigation } from '@react-navigation/native';
+import EmptyState from '../../components/EmptyState';
 
 import RecommendationList from '../../components/RecommendationList';
 
@@ -35,12 +36,7 @@ export default function CartScreen() {
         </View>
     );
 
-    return (
-import EmptyState from '../../components/EmptyState';
-
-    // ... inside component
-
-    return (
+    return ( 
         <View style={styles.container}>
             <Text style={styles.title}>Your Cart</Text>
 
