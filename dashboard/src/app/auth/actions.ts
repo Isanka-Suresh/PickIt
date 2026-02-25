@@ -33,6 +33,12 @@ export async function login(formData: FormData) {
         return { error: 'User profile not found. Please contact support.' }
     }
 
+    // Store role in user_metadata so middleware can read it from the JWT
+    // without making an extra DB query on every request
+    await adminClient.auth.admin.updateUserById(authData.user.id, {
+        user_metadata: { role: profile.role }
+    })
+
     revalidatePath('/', 'layout')
 
     // Redirect based on role

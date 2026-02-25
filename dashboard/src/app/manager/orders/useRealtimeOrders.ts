@@ -3,16 +3,16 @@
 import { useEffect, useState } from 'react'
 import { createClient } from '@/utils/supabase/client'
 
-interface Order {
+// Using a generic so this hook preserves whatever Order shape the parent provides
+// (including nested joins like order_items, order_assignments, profiles)
+// while still being able to handle the partial updates from the realtime payload.
+interface BaseOrder {
     id: string
-    customer_id: string
     status: string
-    scheduled_time: string | null
-    created_at: string
 }
 
-export function useRealtimeOrders(branchId: string, initialOrders: Order[]) {
-    const [orders, setOrders] = useState<Order[]>(initialOrders)
+export function useRealtimeOrders<T extends BaseOrder>(branchId: string, initialOrders: T[]) {
+    const [orders, setOrders] = useState<T[]>(initialOrders)
     const supabase = createClient()
 
     useEffect(() => {
@@ -31,11 +31,14 @@ export function useRealtimeOrders(branchId: string, initialOrders: Order[]) {
                 },
                 (payload) => {
                     if (payload.eventType === 'INSERT') {
-                        setOrders((current) => [payload.new as Order, ...current])
+                        // New orders from realtime won't have join data — they'll appear
+                        // once the page is refreshed via router.refresh() in the parent.
+                        // We cast here to satisfy TypeScript; the parent calls router.refresh() on updates.
+                        setOrders((current) => [payload.new as T, ...current])
                     } else if (payload.eventType === 'UPDATE') {
                         setOrders((current) =>
                             current.map((order) =>
-                                order.id === payload.new.id ? (payload.new as Order) : order
+                                order.id === payload.new.id ? { ...order, ...payload.new } : order
                             )
                         )
                     } else if (payload.eventType === 'DELETE') {

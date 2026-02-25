@@ -5,44 +5,27 @@ export default async function ManagerDashboardPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Fetch profile with full name
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user?.id)
-        .single()
+    // Fetch profile and branch in parallel (both only need user.id)
+    const [{ data: profile }, { data: branch }] = await Promise.all([
+        supabase.from('profiles').select('full_name').eq('id', user?.id).single(),
+        supabase.from('branches').select('id, name, supermarket_id').eq('manager_id', user?.id).single(),
+    ])
 
-    // Fetch branch info where user is manager
-    const { data: branch } = await supabase
-        .from('branches')
-        .select('id, name, supermarket_id')
-        .eq('manager_id', user?.id)
-        .single()
+    // Now fetch all counts in parallel (they all depend on branch.id)
+    const branchId = branch?.id || ''
+    const [
+        { count: productsCount },
+        { count: employeesCount },
+        { data: orders },
+    ] = await Promise.all([
+        supabase.from('products').select('*', { count: 'exact', head: true }).eq('branch_id', branchId),
+        supabase.from('employees').select('*', { count: 'exact', head: true }).eq('branch_id', branchId),
+        // Fetch all orders once and compute total + pending in JS (saves one DB round-trip)
+        supabase.from('orders').select('status').eq('branch_id', branchId),
+    ])
 
-    // Fetch products count for the branch
-    const { count: productsCount } = await supabase
-        .from('products')
-        .select('*', { count: 'exact', head: true })
-        .eq('branch_id', branch?.id || '')
-
-    // Fetch employees count for the branch
-    const { count: employeesCount } = await supabase
-        .from('employees')
-        .select('*', { count: 'exact', head: true })
-        .eq('branch_id', branch?.id || '')
-
-    // Fetch orders count for the branch
-    const { count: ordersCount } = await supabase
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('branch_id', branch?.id || '')
-
-    // Fetch pending orders count
-    const { count: pendingCount } = await supabase
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
-        .eq('branch_id', branch?.id || '')
-        .neq('status', 'completed')
+    const ordersCount = orders?.length ?? 0
+    const pendingCount = orders?.filter(o => o.status !== 'completed').length ?? 0
 
     const stats = [
         {

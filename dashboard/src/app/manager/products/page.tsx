@@ -5,7 +5,7 @@ export default async function ProductsPage() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
-    // Get manager's branch
+    // Get manager's branch first (needed to scope the products query)
     const { data: branch } = await supabase
         .from('branches')
         .select('id, name')
@@ -31,7 +31,8 @@ export default async function ProductsPage() {
                 </div>
             </div>
 
-            <ProductsClient initialProducts={products || []} />
+            {/* Pass branchId so the modal can include it — eliminates a DB lookup per mutation */}
+            <ProductsClient initialProducts={products || []} branchId={branch?.id || ''} />
         </div>
     )
 }

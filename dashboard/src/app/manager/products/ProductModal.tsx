@@ -16,9 +16,10 @@ interface ProductModalProps {
     onClose: () => void
     product?: Product | null
     onSuccess: () => void
+    branchId: string
 }
 
-export default function ProductModal({ isOpen, onClose, product, onSuccess }: ProductModalProps) {
+export default function ProductModal({ isOpen, onClose, product, onSuccess, branchId }: ProductModalProps) {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const formRef = useRef<HTMLFormElement>(null)
@@ -81,6 +82,8 @@ export default function ProductModal({ isOpen, onClose, product, onSuccess }: Pr
 
                 {/* Form */}
                 <form ref={formRef} onSubmit={handleSubmit} className="p-6 space-y-4">
+                    {/* Hidden field — avoids a DB round-trip in createProduct */}
+                    {!product && <input type="hidden" name="branch_id" value={branchId} />}
                     {error && (
                         <div className="bg-red-500/10 border border-red-500/50 rounded-xl p-4">
                             <p className="text-red-400 text-sm">{error}</p>

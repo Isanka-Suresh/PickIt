@@ -11,15 +11,21 @@ export async function createProduct(formData: FormData) {
         return { error: 'Not authenticated' }
     }
 
-    // Get manager's branch
-    const { data: branch } = await supabase
-        .from('branches')
-        .select('id')
-        .eq('manager_id', user.id)
-        .single()
+    // branch_id is passed as a hidden form field from the modal (avoids an extra DB round-trip).
+    // Fall back to a DB lookup for safety if the field is somehow missing.
+    let branchId = formData.get('branch_id') as string | null
 
-    if (!branch) {
-        return { error: 'No branch assigned to this manager' }
+    if (!branchId) {
+        const { data: branch } = await supabase
+            .from('branches')
+            .select('id')
+            .eq('manager_id', user.id)
+            .single()
+
+        if (!branch) {
+            return { error: 'No branch assigned to this manager' }
+        }
+        branchId = branch.id
     }
 
     const name = formData.get('name') as string
@@ -42,7 +48,7 @@ export async function createProduct(formData: FormData) {
     const { data, error } = await supabase
         .from('products')
         .insert({
-            branch_id: branch.id,
+            branch_id: branchId,
             name,
             category,
             price,

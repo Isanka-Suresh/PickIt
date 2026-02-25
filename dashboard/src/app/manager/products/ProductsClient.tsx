@@ -15,9 +15,10 @@ interface Product {
 
 interface ProductsClientProps {
     initialProducts: Product[]
+    branchId: string
 }
 
-export default function ProductsClient({ initialProducts }: ProductsClientProps) {
+export default function ProductsClient({ initialProducts, branchId }: ProductsClientProps) {
     const router = useRouter()
     const [products, setProducts] = useState<Product[]>(initialProducts)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -144,6 +145,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                 onClose={handleCloseModal}
                 product={editingProduct}
                 onSuccess={handleSuccess}
+                branchId={branchId}
             />
         </>
     )

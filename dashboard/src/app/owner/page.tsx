@@ -9,31 +9,22 @@ export default async function OwnerDashboardPage() {
     // Use admin client for data fetching (bypasses RLS)
     const adminClient = createAdminClient()
 
-    // Fetch profile with full name
-    const { data: profile } = await adminClient
-        .from('profiles')
-        .select('full_name')
-        .eq('id', user?.id)
-        .single()
-
-    // Fetch supermarkets count (using admin client to bypass RLS)
-    const { count: supermarketsCount, error: supermarketsError } = await adminClient
-        .from('supermarkets')
-        .select('*', { count: 'exact', head: true })
+    // Fetch all stats in parallel — dramatically faster than sequential awaits
+    const [
+        { data: profile },
+        { count: supermarketsCount, error: supermarketsError },
+        { count: branchesCount },
+        { count: ordersCount },
+    ] = await Promise.all([
+        adminClient.from('profiles').select('full_name').eq('id', user?.id).single(),
+        adminClient.from('supermarkets').select('*', { count: 'exact', head: true }),
+        adminClient.from('branches').select('*', { count: 'exact', head: true }),
+        adminClient.from('orders').select('*', { count: 'exact', head: true }),
+    ])
 
     if (supermarketsError) {
         console.error('Error fetching supermarkets:', supermarketsError)
     }
-
-    // Fetch branches count
-    const { count: branchesCount } = await adminClient
-        .from('branches')
-        .select('*', { count: 'exact', head: true })
-
-    // Fetch orders count
-    const { count: ordersCount } = await adminClient
-        .from('orders')
-        .select('*', { count: 'exact', head: true })
 
     const stats = [
         { label: 'Supermarkets', value: supermarketsCount?.toString() || '0', icon: '🏪', color: 'from-amber-500 to-orange-500' },

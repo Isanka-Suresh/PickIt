@@ -14,10 +14,10 @@ interface Employee {
 
 interface EmployeesClientProps {
     initialEmployees: Employee[]
+    branchId: string
 }
 
-
-export default function EmployeesClient({ initialEmployees }: EmployeesClientProps) {
+export default function EmployeesClient({ initialEmployees, branchId }: EmployeesClientProps) {
     const router = useRouter()
     const [employees, setEmployees] = useState<Employee[]>(initialEmployees)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -167,6 +167,7 @@ export default function EmployeesClient({ initialEmployees }: EmployeesClientPro
                 onClose={handleCloseModal}
                 employee={editingEmployee}
                 onSuccess={handleSuccess}
+                branchId={branchId}
             />
         </>
     )

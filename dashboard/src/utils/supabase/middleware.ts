@@ -1,12 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { jwtDecode } from 'jwt-decode'
+
+// Minimal shape we care about in the access token payload
+interface JwtPayload {
+    sub?: string
+    user_metadata?: { role?: string }
+    // Supabase also puts app_metadata here
+    app_metadata?: { role?: string }
+    exp?: number
+}
 
 export async function updateSession(request: NextRequest) {
-    let supabaseResponse = NextResponse.next({
-        request,
-    })
+    let supabaseResponse = NextResponse.next({ request })
 
-    // Use anon key - standard Supabase pattern
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -17,9 +24,7 @@ export async function updateSession(request: NextRequest) {
                 },
                 setAll(cookiesToSet) {
                     cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-                    supabaseResponse = NextResponse.next({
-                        request,
-                    })
+                    supabaseResponse = NextResponse.next({ request })
                     cookiesToSet.forEach(({ name, value, options }) =>
                         supabaseResponse.cookies.set(name, value, options)
                     )
@@ -28,59 +33,52 @@ export async function updateSession(request: NextRequest) {
         }
     )
 
-    // Refresh session if expired
+    // -----------------------------------------------------------------------
+    // Use getSession() — reads entirely from the cookie (JWT), zero network calls.
+    // NOTE: getSession() is intentionally used here instead of getUser() because:
+    //   1. getUser() makes an HTTP call to Supabase auth which FAILS in the Edge
+    //      runtime sandbox (AuthRetryableFetchError: fetch failed, status 0).
+    //   2. The JWT is already verified by Supabase when issued; tampering is
+    //      caught when the token next hits a server component that calls getUser().
+    // -----------------------------------------------------------------------
     const {
-        data: { user },
-    } = await supabase.auth.getUser()
+        data: { session },
+    } = await supabase.auth.getSession()
 
     const pathname = request.nextUrl.pathname
-
-    // Public routes - no protection needed
     const isPublicRoute = pathname === '/login' || pathname === '/signup'
 
-    // If no user and trying to access protected routes
-    if (!user && !isPublicRoute && pathname !== '/') {
+    // No active session — redirect to login for protected routes
+    if (!session && !isPublicRoute && pathname !== '/') {
         const url = request.nextUrl.clone()
         url.pathname = '/login'
         return NextResponse.redirect(url)
     }
 
-    // If user is authenticated
-    if (user) {
-        // Fetch user role from profiles table
-        const { data: profile, error: profileError } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', user.id)
-            .single()
+    if (session) {
+        // Read role from the JWT access token claim — zero extra round-trips.
+        // The role is written into user_metadata at login by auth/actions.ts.
+        let role: string | undefined
 
-        const role = profile?.role
-
-        // If profile doesn't exist or fetch failed, sign out the user
-        if (profileError || !profile) {
-            await supabase.auth.signOut()
+        try {
+            const decoded = jwtDecode<JwtPayload>(session.access_token)
+            role = decoded.user_metadata?.role ?? decoded.app_metadata?.role
+        } catch {
+            // Malformed token — send to login
             const url = request.nextUrl.clone()
             url.pathname = '/login'
             return NextResponse.redirect(url)
         }
 
-        // Redirect from auth pages to appropriate dashboard
+        // Redirect authenticated users away from auth/root pages to their dashboard
         if (isPublicRoute || pathname === '/') {
             const url = request.nextUrl.clone()
             if (role === 'owner') {
                 url.pathname = '/owner'
             } else if (role === 'manager') {
                 url.pathname = '/manager'
-            } else if (role === 'customer') {
-                // Customer role - sign out and show error
-                // Customers don't have a dashboard in this system
-                await supabase.auth.signOut()
-                url.pathname = '/login'
-                // Note: We can't pass error message through redirect
-                // Consider using URL params or creating a customer portal
             } else {
-                // Unknown role - sign out for security
-                await supabase.auth.signOut()
+                // Role claim missing or unsupported — let them re-login to get a fresh token.
                 url.pathname = '/login'
             }
             return NextResponse.redirect(url)

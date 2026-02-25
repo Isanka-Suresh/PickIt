@@ -31,7 +31,8 @@ export default async function EmployeesPage() {
                 </div>
             </div>
 
-            <EmployeesClient initialEmployees={employees || []} />
+            {/* Pass branchId so the modal can include it — eliminates a DB lookup per mutation */}
+            <EmployeesClient initialEmployees={employees || []} branchId={branch?.id || ''} />
         </div>
     )
 }
