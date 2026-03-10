@@ -1,0 +1,16 @@
+{
+  "latent_factors_K": 20,
+  "matrix_shape": [
+    80,
+    40
+  ],
+  "sparsity_pct": 58.69,
+  "cv_folds": 5,
+  "rmse_mean": 1.2179,
+  "rmse_std": 0.0451,
+  "mae_mean": 1.0535,
+  "mae_std": 0.0483,
+  "precision_at_5": 0.1023,
+  "recall_at_5": 0.2606,
+  "f1_at_5": 0.1469
+}

@@ -1,0 +1,11 @@
+{
+  "total_rules": 112,
+  "strong_rules": 62,
+  "avg_confidence": 0.6636,
+  "avg_lift": 4.5599,
+  "avg_support": 0.0671,
+  "min_support_used": 0.03,
+  "min_confidence_used": 0.4,
+  "min_lift_used": 1.2,
+  "n_transactions": 977
+}
