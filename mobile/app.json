@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "PickIt Mobile",
+    "slug": "pickit-mobile",
+    "version": "1.0.0",
+    "android": {
+      "package": "com.pickit.mobile"
+    },
+    "ios": {
+      "bundleIdentifier": "com.pickit.mobile"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      "expo-asset"
+    ]
+  }
+}
