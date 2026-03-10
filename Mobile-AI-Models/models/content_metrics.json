@@ -1,0 +1,8 @@
+{
+  "n_products": 40,
+  "avg_cosine_similarity": 0.3251,
+  "min_cosine_similarity": 0.0,
+  "max_cosine_similarity": 1.0,
+  "category_hit_rate": 0.8417,
+  "tfidf_vocab_size": 239
+}
